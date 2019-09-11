@@ -4,10 +4,11 @@ from tensorflow.keras.layers import Activation
 from tensorflow.keras.models import load_model
 from tensorflow.keras import layers
 import json
-
-def return_model(input_size,no_of_hidden_layers,hidden_unit_size,activation_function,category,classes,eval_metrics,optimizer_func):
+from train_model import Train_model
+def return_model(no_of_hidden_layers,hidden_unit_size,activation_function,category,classes,eval_metrics,optimizer_func):
 	model=tf.keras.Sequential()
-	model.add(tf.keras.layers.Dense(input_size,activation=activation_function))
+	#model.add(tf.keras.layers.Dense(input_size,activation=activation_function))
+	model.add(tf.keras.layers.Flatten())
 	for i in range(no_of_hidden_layers):
 		model.add(tf.keras.layers.Dense(input_size,activation=activation_function))
 	if category==1:
@@ -21,10 +22,10 @@ def return_model(input_size,no_of_hidden_layers,hidden_unit_size,activation_func
 	
 		
 	
-if __name__=='__main__':
+def new_model_create():
 	print('CATEGORIES: \n1\t Classification\n2\t Regression')
 	category=int(input('Enter the category'))
-	input_size=int(input('Enter the input dimension'))
+	#input_size=int(input('Enter the input dimension'))
 	hidden_units=int(input('Enter the no. of hidden layers:'))
 	hidden_unit_size=int(input('Enter the no. of neurons in hidden layer:'))
 	print('activation functions: \n 1\t relu\n 2\tsoftmax\n 3\t tanh\n 4\tsigmoid\n')
@@ -43,11 +44,13 @@ if __name__=='__main__':
 		classes=int(input('Select no. of output classes'))
 	else:	
 		classes=1
-	model=return_model(input_size,hidden_units,hidden_unit_size,functions[activation_function],category,classes,eval_metrics,optimizer_dict[optimizer])
-	config={'input_size':input_size,'no_of_hidden_layers':hidden_units,'hidden_unit_size':hidden_unit_size,'activation_function':functions[activation_function],'category':category,'classes':classes,'metrics':eval_metrics,'optimizer':optimizer}
+	model=return_model(hidden_units,hidden_unit_size,functions[activation_function],category,classes,eval_metrics,optimizer_dict[optimizer])
+	config={'no_of_hidden_layers':hidden_units,'hidden_unit_size':hidden_unit_size,'activation_function':functions[activation_function],'category':category,'classes':classes,'metrics':eval_metrics,'optimizer':optimizer_dict[optimizer]}
 	with open('config.json','w') as json_file:
 		json.dump(config,json_file)	
 	model.save('ann.h5')
 	load_model('ann.h5')
 	print('model loaded successfully')
-	#print(layer.get_config())
+	
+if __name__=='__main__':
+	new_model_create()

@@ -1,13 +1,13 @@
-def update_model(json_file):
-	import json
-	from tensorflow.keras.models import load_model
-	import tensorflow as tf
-	
+import json
+from tensorflow.keras.models import load_model
+import tensorflow as tf
+from train_model import Train_model
+def update_model(json_file):	
 	model=load_model('ann.h5')
 	with open(json_file,'r') as f:
 		config=json.load(f)
 	
-	input_size = config['input_size']
+	#input_size = config['input_size']
 	classes = config['classes']
 	hidden_layers=config['no_of_hidden_layers']
 	hidden_layer_size=config['hidden_unit_size']
@@ -19,7 +19,7 @@ def update_model(json_file):
 	orig_layer=len(model.layers)
 	new_layers=hidden_layers+2 - orig_layer
 	model.layers.pop()
-	model.layers[0]=tf.keras.layers.Dense(input_size,activation=activation_function)
+	#model.layers[0]=tf.keras.layers.Dense(input_size,activation=activation_function)
 	
 	if new_layers>0:
 		model.add(tf.keras.layers.Dense(hidden_layer_size,activation=activation_function))
@@ -40,14 +40,10 @@ def update_model(json_file):
 		model.compile(optimizer=optimizer_func,loss='sparse_categorical_crossentropy',metrics=eval_metrics)
 	else:
 		model.add(tf.keras.layers.Dense(classes,activation='tanh'))
-		model.compile(optimizer=optimizer_func,loss='mean_squared_error',metrics=eval_metrics
-	
-	#for i in range(1,len(model.layers)):
-    		#model.layers[i].name = model.layers[i].name + '1'
-		
+		model.compile(optimizer=optimizer_func,loss='mean_squared_error',metrics=eval_metrics)		
 	return model
 
 if __name__=='__main__':
 	new_model=update_model('config.json')
-	
+	#Train_model(new_model,3)
 			
