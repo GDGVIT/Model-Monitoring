@@ -5,7 +5,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras import layers
 import json
 
-def return_model(input_size,no_of_hidden_layers,hidden_unit_size,activation_function,category,classes,eval_metrics):
+def return_model(input_size,no_of_hidden_layers,hidden_unit_size,activation_function,category,classes,eval_metrics,optimizer_func):
 	model=tf.keras.Sequential()
 	model.add(tf.keras.layers.Dense(input_size,activation=activation_function))
 	for i in range(no_of_hidden_layers):
@@ -15,7 +15,7 @@ def return_model(input_size,no_of_hidden_layers,hidden_unit_size,activation_func
 		model.compile(optimizer='adam',loss='sparse_categorical_crossentropy',metrics=eval_metrics)
 	else:
 		model.add(tf.keras.layers.Dense(classes,activation='tanh'))
-		model.compile(optimizer='adam',loss='mean_squared_error',metrics=eval_metrics)
+		model.compile(optimizer=optimizer_func,loss='mean_squared_error',metrics=eval_metrics)
 	
 	return model
 	
@@ -35,13 +35,16 @@ if __name__=='__main__':
 	metrics=[int(x) for x in input().split(' ')]
 	eval_metrics=[]
 	for i in metrics:
-		eval_metrics.append(metrics_dict[i]) 
+		eval_metrics.append(metrics_dict[i])
+	print('Enter the optimizer:\n 1. Adagrad\n 2. Adadelta\n 3. Adam\n 4.Nadam')
+	optimizer=int(input())
+	optimizer_dict={1:'Adagrad',2:'Adadelta',3:'Adam',4:'Nadam'}
 	if category==1:
 		classes=int(input('Select no. of output classes'))
 	else:	
 		classes=1
-	model=return_model(input_size,hidden_units,hidden_unit_size,functions[activation_function],category,classes,eval_metrics)
-	config={'input_size':input_size,'no_of_hidden_layers':hidden_units,'hidden_unit_size':hidden_unit_size,'activation_function':functions[activation_function],'category':category,'classes':classes,'metrics':eval_metrics}
+	model=return_model(input_size,hidden_units,hidden_unit_size,functions[activation_function],category,classes,eval_metrics,optimizer_dict[optimizer])
+	config={'input_size':input_size,'no_of_hidden_layers':hidden_units,'hidden_unit_size':hidden_unit_size,'activation_function':functions[activation_function],'category':category,'classes':classes,'metrics':eval_metrics,'optimizer':optimizer}
 	with open('config.json','w') as json_file:
 		json.dump(config,json_file)	
 	model.save('ann.h5')
