@@ -7,8 +7,6 @@ def update_model(json_file):
 	with open(json_file,'r') as f:
 		config=json.load(f)
 	
-	#input_size = config['input_size']
-	classes = config['classes']
 	hidden_layers=config['no_of_hidden_layers']
 	hidden_layer_size=config['hidden_unit_size']
 	activation_function=config['activation_function']
@@ -19,7 +17,6 @@ def update_model(json_file):
 	orig_layer=len(model.layers)
 	new_layers=hidden_layers+2 - orig_layer
 	model.layers.pop()
-	#model.layers[0]=tf.keras.layers.Dense(input_size,activation=activation_function)
 	
 	if new_layers>0:
 		model.add(tf.keras.layers.Dense(hidden_layer_size,activation=activation_function))
@@ -36,11 +33,11 @@ def update_model(json_file):
 			model.layers[i]=tf.keras.layers.Dense(hidden_layer_size,activation=activation_function)
 			print(model.layers[i].name)
 	if category==1:
-		model.add(tf.keras.layers.Dense(classes,activation=tf.nn.softmax))
+		model.add(tf.keras.layers.Dense(10,activation=tf.nn.softmax))
 		model.compile(optimizer=optimizer_func,loss='sparse_categorical_crossentropy',metrics=eval_metrics)
 	else:
-		model.add(tf.keras.layers.Dense(classes,activation='tanh'))
-		model.compile(optimizer=optimizer_func,loss='mean_squared_error',metrics=eval_metrics)		
+		model.add(tf.keras.layers.Dense(1,activation='tanh'))
+		model.compile(optimizer=optimizer_func,loss='mean_squared_error',metrics=['mae'])		
 	return model
 
 if __name__=='__main__':
