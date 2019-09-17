@@ -5,8 +5,10 @@ from tensorflow.keras.models import load_model
 #from dl_bot import DLBot
 from tensorflow.keras.datasets import boston_housing
 import json
-def Train_model(model,epochs,json_file):
+def Train_model(model,json_file):
 
+	epochs=3
+	
 	#telegram callback
 	telegram_token = "TOKEN" 
 	telegram_user_id = None   

@@ -2,8 +2,7 @@ import json
 from tensorflow.keras.models import load_model
 import tensorflow as tf
 from train_model import Train_model
-def update_model(json_file):	
-	model=load_model('ann.h5')
+def update_model(json_file,model):	
 	with open(json_file,'r') as f:
 		config=json.load(f)
 	
@@ -40,7 +39,5 @@ def update_model(json_file):
 		model.compile(optimizer=optimizer_func,loss='mean_squared_error',metrics=['mae'])		
 	return model
 
-if __name__=='__main__':
-	new_model=update_model('config.json')
-	#Train_model(new_model,3)
+
 			
