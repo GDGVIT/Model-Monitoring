@@ -1,11 +1,12 @@
 import tensorflow as tf
 import cv2
 from tensorflow.keras.layers import Activation
-from tensorflow.keras.models import load_model
+from tensorflow.keras.models import load_model,Sequential
 from tensorflow.keras import layers
 import json
 from train_model import Train_model
 from tensorflow.keras.datasets import boston_housing
+from tensorflow.keras.layers import Conv2D,MaxPooling2D,Dense,Flatten,Dropout
 
 def regression_model(no_of_hidden_layers,hidden_unit_size,activation_function,optimizer_func):
 	model=tf.keras.Sequential()
@@ -25,44 +26,36 @@ def classsification_model(no_of_hidden_layers,hidden_unit_size,activation_functi
 	model.compile(optimizer='adam',loss='sparse_categorical_crossentropy',metrics=eval_metrics)
 	return model
 
-def return_model(no_of_hidden_layers,hidden_unit_size,activation_function,category,eval_metrics,optimizer_func):
+def cnn(no_of_cnn_layers,no_of_cnn_filters,Activation,Optimizer,eval_metrics):
+	input_shape=(28,28,1)
+	model=tf.keras.Sequential()
+	model.add(Conv2D(no_of_cnn_filters,(3,3),activation=Activation,input_shape=input_shape))
+	for i in range(no_of_cnn_layers-1):
+		model.add(Conv2D(no_of_cnn_filters,(3,3),activation=Activation))
+		model.add(MaxPooling2D(pool_size=(2,2)))
+		model.add(Dropout(0.25))
+
+	model.add(Flatten())
+	model.add(Dense(128,activation=Activation))
+	model.add(Dropout(0.5))
+	model.add(Dense(10,activation='softmax'))
+
+	model.compile(loss='binary_crossentropy',optimizer=Optimizer,metrics=eval_metrics)
+	return model
+
+def return_model(json_file):
+	with open(json_file,'r') as f:
+		config=json.load(f)
+	no_hidden_layers=config['no_of_hidden_layers']
+	hidden_unit_size=config['hidden_unit_size']
+	activation_function=config['activation_function']
+	eval_metrics=config['metrics']
+	category=config['category']
+	optimizer_func=config['optimizer']	
 	if category==1:
 		model=classsification_model(no_of_hidden_layers,hidden_unit_size,activation_function,optimizer_func)
 	elif category==2:
 		model=regression_model(no_of_hidden_layers,hidden_unit_size,activation_function,eval_metrics,optimizer_func)
+	elif category==3:
+		model=cnn(no_of_hidden_layers,hidden_unit_size,activation_function,optimizer_func,eval_metrics)
 	return model
-	
-		
-	
-def new_model_create():
-	print('CATEGORIES: \n1\t Classification\n2\t Regression')
-	category=int(input('Enter the category'))
-	#input_size=int(input('Enter the input dimension'))
-	hidden_units=int(input('Enter the no. of hidden layers:'))
-	hidden_unit_size=int(input('Enter the no. of neurons in hidden layer:'))
-	print('activation functions: \n 1\t relu\n 2\tsoftmax\n 3\t tanh\n 4\tsigmoid\n')
-	activation_function=int(input('Enter the activation function number'))
-	functions={1:'relu',2:'softmax',3:'tanh',4:'sigmoid'}
-	metrics_dict={1:'accuracy',2:'binary_accuracy',3:'categorical_accuracy'}
-	if category==1:
-		print('Enter the metrics for evaluation (enter space separated values):\n 1. accuracy\n 2. binary_accuracy\n 3. categorical_accuracy')
-		metrics=[int(x) for x in input().split(' ')]
-		eval_metrics=[]
-		for i in metrics:
-			eval_metrics.append(metrics_dict[i])
-	else:
-		metrics=['mae']
-	print('Enter the optimizer:\n 1. Adagrad\n 2. Adadelta\n 3. Adam\n 4.Nadam')
-	optimizer=int(input())
-	optimizer_dict={1:'Adagrad',2:'Adadelta',3:'Adam',4:'Nadam'}
-	model=return_model(hidden_units,hidden_unit_size,functions[activation_function],category,eval_metrics,optimizer_dict[optimizer])
-	config={'no_of_hidden_layers':hidden_units,'hidden_unit_size':hidden_unit_size,'activation_function':functions[activation_function],'category':category,'metrics':eval_metrics,'optimizer':optimizer_dict[optimizer]}
-	with open('config.json','w') as json_file:
-		json.dump(config,json_file)	
-	#Train_model(model,3,'config.json')
-	model.save('ann.h5')
-	#load_model('ann.h5')
-	#print('model loaded successfully')
-	
-if __name__=='__main__':
-	new_model_create()
